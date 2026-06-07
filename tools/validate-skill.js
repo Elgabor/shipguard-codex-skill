@@ -44,7 +44,6 @@ function assertExists(relativePath) {
 }
 
 assertExists(".codex-plugin/plugin.json");
-assertExists(".agents/plugins/marketplace.json");
 assertExists(`skills/${SKILL_NAME}/SKILL.md`);
 assertExists(`skills/${SKILL_NAME}/agents/openai.yaml`);
 assertExists(`skills/${SKILL_NAME}/references/audit-playbook.md`);
@@ -55,20 +54,11 @@ assertExists(`skills/${SKILL_NAME}/scripts/shipguard-scan.js`);
 assertExists("bin/shipguard.js");
 
 const plugin = JSON.parse(read(".codex-plugin/plugin.json"));
-const marketplace = JSON.parse(read(".agents/plugins/marketplace.json"));
 if (plugin.name !== SKILL_NAME) {
   fail("plugin name does not match package name");
 }
 if (plugin.skills !== "./skills/") {
   fail("plugin skills path should point at ./skills/");
-}
-if (!Array.isArray(marketplace.plugins) || marketplace.plugins.length !== 1) {
-  fail("marketplace should expose exactly one plugin");
-} else {
-  const [entry] = marketplace.plugins;
-  if (entry.name !== SKILL_NAME || entry.source?.path !== "./") {
-    fail("marketplace entry should point at this plugin root");
-  }
 }
 
 const skill = readSkill("SKILL.md");

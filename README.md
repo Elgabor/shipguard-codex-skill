@@ -1,19 +1,42 @@
 # ShipGuard
 
+[![npm version](https://img.shields.io/npm/v/shipguard-codex-skill.svg)](https://www.npmjs.com/package/shipguard-codex-skill)
+[![GitHub](https://img.shields.io/badge/GitHub-Elgabor%2Fshipguard--codex--skill-black)](https://github.com/Elgabor/shipguard-codex-skill)
+
 ShipGuard is a Codex skill plus a dependency-free CI scanner for practical
 security launch reviews. It is built for codebases, SaaS apps, APIs, mobile
 backends, GitHub Actions workflows, and MVPs that need a clear go/no-go security
 pass before release.
 
-## Install
+Published package:
 
-As a local Codex skill through `npx` after npm publication:
+- npm: <https://www.npmjs.com/package/shipguard-codex-skill>
+- GitHub: <https://github.com/Elgabor/shipguard-codex-skill>
+
+## What It Does
+
+ShipGuard helps Codex run a security review with a concrete workflow instead of
+a generic checklist. It focuses on:
+
+- exposed secrets and unsafe env files;
+- auth, authorization, and tenant/data isolation mistakes;
+- injection, unsafe uploads, SSRF, XSS, and dangerous code execution;
+- payment, webhook, and entitlement trust boundaries;
+- GitHub Actions, npm, and dependency supply-chain risk;
+- deployment config, logs, privacy leaks, CORS, CSRF, and security headers.
+
+The bundled scanner is deterministic and dependency-free. It is a first-pass
+gate for common issues; Codex still performs the manual review and fix plan.
+
+## Install In Codex
+
+Install the published npm package:
 
 ```bash
 npx --yes shipguard-codex-skill@0.1.0 install
 ```
 
-From the first GitHub release tag:
+Or install from the pinned GitHub release tag:
 
 ```bash
 npx --yes github:Elgabor/shipguard-codex-skill#v0.1.0 install
@@ -33,17 +56,10 @@ the detected Codex skill root, usually ~/.codex/skills or ~/.agents/skills
 
 Open a new Codex chat if skill autocomplete does not refresh immediately.
 
-As a Codex plugin marketplace source after the GitHub repo is public:
+Use the skill in Codex:
 
-```bash
-codex plugin marketplace add Elgabor/shipguard-codex-skill
-```
-
-For repeatable installs, prefer a published npm version or a pinned GitHub tag
-after the first release:
-
-```bash
-npx --yes github:Elgabor/shipguard-codex-skill#v0.1.0 install
+```text
+Use $shipguard-codex-skill to audit this repo before launch.
 ```
 
 To force a specific target:
@@ -59,7 +75,35 @@ The installer replaces only a managed
 exists and was not created by ShipGuard, rerun with `--force` only after
 checking its contents.
 
-## Use In Codex
+## Verify It Works
+
+From any repository you want to scan:
+
+```bash
+npx --yes shipguard-codex-skill@0.1.0 --help
+npx --yes shipguard-codex-skill@0.1.0 scan --path . --format json
+npx --yes shipguard-codex-skill@0.1.0 ci --path . --fail-on high
+```
+
+Expected clean output for a repo with no built-in findings:
+
+```json
+{
+  "findings": []
+}
+```
+
+or:
+
+```text
+ShipGuard: no findings from built-in checks.
+```
+
+If you test `npx` from inside this package's own checkout, npm may prefer local
+package resolution. For a clean smoke test, run the commands from another
+directory or a temporary folder.
+
+## Use With Codex
 
 ```text
 Use $shipguard-codex-skill to audit this repo before launch.
@@ -75,13 +119,30 @@ Use $shipguard-codex-skill and implement the Critical and High fixes only.
 Verify with the smallest meaningful tests.
 ```
 
-## Run Locally
+ShipGuard asks Codex to return a structured result:
+
+```text
+Security decision: Pass / Pass after fixes / Do not launch yet
+Risk level: Low / Medium / High / Critical
+
+Confirmed findings
+- Evidence
+- Impact
+- Fix
+- Verify
+
+Needs verification
+Fastest safe fix plan
+Verification
+```
+
+## Run The Scanner
 
 ```bash
-node bin/shipguard.js scan --path .
-node bin/shipguard.js scan --path . --format json
-node bin/shipguard.js scan --path . --format sarif > shipguard.sarif
-node bin/shipguard.js ci --path . --fail-on high
+npx --yes shipguard-codex-skill@0.1.0 scan --path .
+npx --yes shipguard-codex-skill@0.1.0 scan --path . --format json
+npx --yes shipguard-codex-skill@0.1.0 scan --path . --format sarif > shipguard.sarif
+npx --yes shipguard-codex-skill@0.1.0 ci --path . --fail-on high
 ```
 
 The built-in scanner is a first pass. It finds common exposed secret patterns,
@@ -120,12 +181,6 @@ jobs:
         run: npx --yes shipguard-codex-skill@0.1.0 ci --fail-on high
 ```
 
-After npm publication, use:
-
-```bash
-npx --yes shipguard-codex-skill@0.1.0 ci --fail-on high
-```
-
 For AI-assisted pull request review with the official Codex GitHub Action, use
 the optional pattern in
 `skills/shipguard-codex-skill/references/codex-action-ci.md`. That requires an
@@ -143,6 +198,7 @@ Thresholds:
 ```bash
 npm test
 npm run validate
+npm run ci
 npm run pack:check
 node bin/shipguard.js ci --fail-on high
 ```

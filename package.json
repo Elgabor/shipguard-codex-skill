@@ -7,7 +7,6 @@
     "shipguard-codex-skill": "bin/shipguard.js"
   },
   "files": [
-    ".agents/",
     ".codex-plugin/",
     "skills/",
     "bin/",
