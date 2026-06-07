@@ -1,0 +1,48 @@
+{
+  "name": "shipguard-codex-skill",
+  "version": "0.1.0",
+  "description": "Codex skill and CI scanner for practical launch-readiness security audits.",
+  "bin": {
+    "shipguard": "bin/shipguard.js",
+    "shipguard-codex-skill": "bin/shipguard.js"
+  },
+  "files": [
+    ".agents/",
+    ".codex-plugin/",
+    "skills/",
+    "bin/",
+    "tools/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "validate": "node tools/validate-skill.js",
+    "audit:deps": "npm audit --omit=dev",
+    "pack:check": "npm pack --dry-run",
+    "ci": "node tools/validate-skill.js && npm run audit:deps && node --test && node bin/shipguard.js ci --fail-on high"
+  },
+  "keywords": [
+    "codex",
+    "skill",
+    "security",
+    "audit",
+    "appsec",
+    "ci",
+    "github-actions",
+    "launch-readiness"
+  ],
+  "author": "Elgabor",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Elgabor/shipguard-codex-skill.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Elgabor/shipguard-codex-skill/issues"
+  },
+  "homepage": "https://github.com/Elgabor/shipguard-codex-skill#readme",
+  "engines": {
+    "node": ">=18"
+  }
+}

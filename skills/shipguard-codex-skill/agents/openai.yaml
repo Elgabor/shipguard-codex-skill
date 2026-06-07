@@ -1,0 +1,4 @@
+interface:
+  display_name: "ShipGuard"
+  short_description: "Security audit skill for launch readiness."
+  default_prompt: "Use $shipguard-codex-skill to audit this repo before launch and return prioritized security fixes."

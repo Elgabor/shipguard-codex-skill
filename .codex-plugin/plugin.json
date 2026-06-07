@@ -1,0 +1,6 @@
+{
+  "name": "shipguard-codex-skill",
+  "version": "0.1.0",
+  "description": "Launch-readiness security audit workflow and CI scanner for Codex.",
+  "skills": "./skills/"
+}
