@@ -1,6 +1,6 @@
 {
   "name": "shipguard-codex-skill",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Codex skill and CI scanner for practical launch-readiness security audits.",
   "bin": {
     "shipguard": "bin/shipguard.js",

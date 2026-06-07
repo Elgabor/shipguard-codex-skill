@@ -19,8 +19,31 @@ Default to four modes:
 3. **Diff audit**: review changed files and adjacent call paths for regressions.
 4. **Fix mode**: implement the smallest safe remediation and verify it.
 
-When local files are available, run `scripts/shipguard-scan.js ci --path <repo>`
-or `node scripts/shipguard-scan.js scan --path <repo>` before manual review.
+## Scope Guardrails
+
+Before reading files or running the scanner, establish the active repository
+root. Run `pwd` and, when available, `git rev-parse --show-toplevel` from the
+user's current project directory. Treat that Git top-level directory as "this
+repo".
+
+Never scan broad parent directories such as `~`, `~/code`, a workspace folder,
+or any directory that contains multiple unrelated repositories. If the current
+directory is not inside the intended repo, ask the user for the repo path or
+tell them to reopen Codex from that project directory.
+
+When local files are available, run the scanner only against the resolved repo
+root, for example:
+
+```bash
+node scripts/shipguard-scan.js ci --path "$(git rev-parse --show-toplevel)"
+```
+
+or:
+
+```bash
+npx --yes shipguard-codex-skill@0.1.1 ci --path "$(git rev-parse --show-toplevel)"
+```
+
 Treat scanner output as leads until the code path is confirmed.
 
 Use Plan mode or write a short plan before broad audits, multi-file fixes, or

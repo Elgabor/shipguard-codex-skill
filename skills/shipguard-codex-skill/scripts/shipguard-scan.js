@@ -226,6 +226,7 @@ function parseArgs(argv) {
   const args = {
     command: "scan",
     path: ".",
+    pathExplicit: false,
     format: "text",
     failOn: "none",
     maxBytes: 1024 * 1024,
@@ -254,6 +255,7 @@ function parseArgs(argv) {
 
     if (token === "--path" || token === "-p") {
       args.path = next();
+      args.pathExplicit = true;
     } else if (token === "--format") {
       args.format = next();
     } else if (token === "--fail-on") {
@@ -362,6 +364,83 @@ function runGit(root, args, input) {
     input,
     maxBuffer: 10 * 1024 * 1024,
   });
+}
+
+function isPathInside(parent, candidate) {
+  const relative = path.relative(parent, candidate);
+  return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
+}
+
+function gitTopLevel(root) {
+  const result = runGit(root, ["rev-parse", "--show-toplevel"]);
+  if (result.status !== 0 || !result.stdout.trim()) {
+    return null;
+  }
+  return realPath(result.stdout.trim());
+}
+
+function findNestedGitRepos(root, maxMatches = 5) {
+  const matches = [];
+  const stack = [root];
+
+  while (stack.length > 0 && matches.length < maxMatches) {
+    const current = stack.pop();
+    let entries;
+    try {
+      entries = fs.readdirSync(current, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+
+    if (entries.some((entry) => entry.name === ".git")) {
+      matches.push(current);
+      continue;
+    }
+
+    for (const entry of entries) {
+      if (!entry.isDirectory() || DEFAULT_EXCLUDES.has(entry.name)) {
+        continue;
+      }
+      stack.push(path.join(current, entry.name));
+    }
+  }
+
+  return matches.sort();
+}
+
+function assertSingleRepositoryScope(root) {
+  if (gitTopLevel(root)) {
+    return;
+  }
+
+  const nestedRepos = findNestedGitRepos(root);
+  if (nestedRepos.length === 0) {
+    return;
+  }
+
+  const formatted = nestedRepos
+    .map((repoPath) => path.relative(root, repoPath) || ".")
+    .slice(0, 5)
+    .join(", ");
+  throw new Error(
+    `Refusing to scan ${root} because it is not a Git repository and contains nested repositories: ${formatted}. Run ShipGuard from one repository or pass --path /path/to/repo.`,
+  );
+}
+
+function resolveScanRoot(rootInput, options = {}) {
+  const requestedRoot = path.resolve(rootInput || ".");
+  if (!fs.existsSync(requestedRoot)) {
+    throw new Error(`Path not found: ${requestedRoot}`);
+  }
+
+  if (options.defaultToGitRoot) {
+    const topLevel = gitTopLevel(requestedRoot);
+    if (topLevel && isPathInside(topLevel, realPath(requestedRoot))) {
+      return topLevel;
+    }
+  }
+
+  return requestedRoot;
 }
 
 function chunkPaths(paths, maxItems = 500, maxBytes = 128 * 1024) {
@@ -785,11 +864,11 @@ function scanGitHubWorkflow(filePath, root) {
 }
 
 function scan(rootInput, options = {}) {
-  const root = path.resolve(rootInput || ".");
+  const root = resolveScanRoot(rootInput, {
+    defaultToGitRoot: options.defaultToGitRoot === true,
+  });
   const maxBytes = options.maxBytes || 1024 * 1024;
-  if (!fs.existsSync(root)) {
-    throw new Error(`Path not found: ${root}`);
-  }
+  assertSingleRepositoryScope(root);
 
   const findings = [];
   const files = walkFiles(root);
@@ -947,10 +1026,13 @@ Commands:
   ci    Run built-in checks for CI. Emits GitHub annotations and fails on high by default.
 
 Options:
-  --path <dir>          Directory to scan. Default: .
+  --path <dir>          Directory to scan. Default: current Git repository when available, otherwise .
   --format <format>     text, json, or sarif. Default: text.
   --fail-on <severity>  Exit 1 when findings meet threshold. Default: none for scan, high for ci.
   --max-bytes <number>  Skip text files larger than this size. Default: 1048576.
+
+Safety:
+  ShipGuard refuses to scan a non-repo parent directory that contains nested Git repositories.
 `);
 }
 
@@ -971,7 +1053,10 @@ function main(argv = process.argv.slice(2)) {
 
   let findings;
   try {
-    findings = scan(args.path, { maxBytes: args.maxBytes });
+    findings = scan(args.path, {
+      maxBytes: args.maxBytes,
+      defaultToGitRoot: !args.pathExplicit,
+    });
   } catch (error) {
     process.stderr.write(`ShipGuard: ${error.message}${os.EOL}`);
     return 2;
@@ -998,6 +1083,7 @@ if (require.main === module) {
 
 module.exports = {
   parseArgs,
+  resolveScanRoot,
   scan,
   shouldFail,
   formatJson,

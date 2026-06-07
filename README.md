@@ -33,13 +33,13 @@ gate for common issues; Codex still performs the manual review and fix plan.
 Install the published npm package:
 
 ```bash
-npx --yes shipguard-codex-skill@0.1.0 install
+npx --yes shipguard-codex-skill@0.1.1 install
 ```
 
 Or install from the pinned GitHub release tag:
 
 ```bash
-npx --yes github:Elgabor/shipguard-codex-skill#v0.1.0 install
+npx --yes github:Elgabor/shipguard-codex-skill#v0.1.1 install
 ```
 
 For local development from this checkout:
@@ -65,9 +65,9 @@ Use $shipguard-codex-skill to audit this repo before launch.
 To force a specific target:
 
 ```bash
-npx --yes shipguard-codex-skill@0.1.0 install --target codex-home
-npx --yes shipguard-codex-skill@0.1.0 install --target agents-home
-npx --yes shipguard-codex-skill@0.1.0 install --target-root /custom/skills
+npx --yes shipguard-codex-skill@0.1.1 install --target codex-home
+npx --yes shipguard-codex-skill@0.1.1 install --target agents-home
+npx --yes shipguard-codex-skill@0.1.1 install --target-root /custom/skills
 ```
 
 The installer replaces only a managed
@@ -80,9 +80,9 @@ checking its contents.
 From any repository you want to scan:
 
 ```bash
-npx --yes shipguard-codex-skill@0.1.0 --help
-npx --yes shipguard-codex-skill@0.1.0 scan --path . --format json
-npx --yes shipguard-codex-skill@0.1.0 ci --path . --fail-on high
+npx --yes shipguard-codex-skill@0.1.1 --help
+npx --yes shipguard-codex-skill@0.1.1 scan --path . --format json
+npx --yes shipguard-codex-skill@0.1.1 ci --path . --fail-on high
 ```
 
 Expected clean output for a repo with no built-in findings:
@@ -139,10 +139,10 @@ Verification
 ## Run The Scanner
 
 ```bash
-npx --yes shipguard-codex-skill@0.1.0 scan --path .
-npx --yes shipguard-codex-skill@0.1.0 scan --path . --format json
-npx --yes shipguard-codex-skill@0.1.0 scan --path . --format sarif > shipguard.sarif
-npx --yes shipguard-codex-skill@0.1.0 ci --path . --fail-on high
+npx --yes shipguard-codex-skill@0.1.1 scan --path .
+npx --yes shipguard-codex-skill@0.1.1 scan --path . --format json
+npx --yes shipguard-codex-skill@0.1.1 scan --path . --format sarif > shipguard.sarif
+npx --yes shipguard-codex-skill@0.1.1 ci --path . --fail-on high
 ```
 
 The built-in scanner is a first pass. It finds common exposed secret patterns,
@@ -178,7 +178,7 @@ jobs:
         with:
           node-version: "22"
       - name: Run ShipGuard
-        run: npx --yes shipguard-codex-skill@0.1.0 ci --fail-on high
+        run: npx --yes shipguard-codex-skill@0.1.1 ci --fail-on high
 ```
 
 For AI-assisted pull request review with the official Codex GitHub Action, use

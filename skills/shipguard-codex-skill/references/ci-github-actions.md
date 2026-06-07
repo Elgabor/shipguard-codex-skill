@@ -28,14 +28,14 @@ jobs:
         with:
           node-version: "22"
       - name: Run ShipGuard
-        run: npx --yes shipguard-codex-skill@0.1.0 ci --fail-on high
+        run: npx --yes shipguard-codex-skill@0.1.1 ci --fail-on high
 ```
 
 For local development before npm publication, use the checked-out repository
 directly or a pinned GitHub release tag:
 
 ```bash
-npx --yes github:Elgabor/shipguard-codex-skill#v0.1.0 ci --fail-on high
+npx --yes github:Elgabor/shipguard-codex-skill#v0.1.1 ci --fail-on high
 ```
 
 ## Thresholds
@@ -54,8 +54,8 @@ The default CI output emits GitHub annotations plus a readable summary.
 For machine processing:
 
 ```bash
-npx --yes shipguard-codex-skill@0.1.0 scan --format json --path .
-npx --yes shipguard-codex-skill@0.1.0 scan --format sarif --path . > shipguard.sarif
+npx --yes shipguard-codex-skill@0.1.1 scan --format json --path .
+npx --yes shipguard-codex-skill@0.1.1 scan --format sarif --path . > shipguard.sarif
 ```
 
 Upload SARIF only after confirming your GitHub plan and repository settings

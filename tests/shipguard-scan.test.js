@@ -107,6 +107,35 @@ test("flags environment files when gitignore does not cover them", () => {
   });
 });
 
+test("default CLI scope resolves a subdirectory to the current git repository root", () => {
+  withTempRepo((root) => {
+    git(root, ["init"]);
+    const appDir = path.join(root, "apps", "web");
+    fs.mkdirSync(appDir, { recursive: true });
+    fs.writeFileSync(path.join(root, ".env.local"), "SAFE_PLACEHOLDER=true\n");
+
+    const findings = scan(appDir, { defaultToGitRoot: true });
+
+    assert.ok(findings.some((item) => item.ruleId === "secret.env-file"));
+  });
+});
+
+test("refuses to scan a non-repo parent directory that contains repositories", () => {
+  withTempRepo((root) => {
+    const firstRepo = path.join(root, "app-one");
+    const secondRepo = path.join(root, "app-two");
+    fs.mkdirSync(firstRepo);
+    fs.mkdirSync(secondRepo);
+    git(firstRepo, ["init"]);
+    git(secondRepo, ["init"]);
+
+    assert.throws(
+      () => scan(root),
+      /Refusing to scan .*contains nested repositories/,
+    );
+  });
+});
+
 test("formats json and sarif output", () => {
   withTempRepo((root) => {
     fs.writeFileSync(path.join(root, ".env"), "SAFE_PLACEHOLDER=true\n");
